@@ -9,6 +9,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -63,6 +66,28 @@ public class AuthHelper {
         System.out.println(map.toString());
 
         return map;
+    }
+
+    public static  String getNewAccessToken(){
+
+    return  null;
+
+    }
+
+    public static void writeToFile(String data , String filePath){
+
+        try {
+            FileWriter file = new FileWriter(filePath);
+
+            for(int i = 0; i < data.length(); i++){
+                file.write(data.charAt(i));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 }
