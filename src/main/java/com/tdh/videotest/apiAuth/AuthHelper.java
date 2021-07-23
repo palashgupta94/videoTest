@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static com.google.gson.JsonParser.*;
 
-public class GetAuthorizationCode {
+public class AuthHelper {
 
     public void getAuthCredentials(){
 
