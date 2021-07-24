@@ -92,28 +92,45 @@ public class AuthHelper {
             JsonObject object = new JsonObject(data);
             System.out.println("data = "+object);
             JsonObject jso = getJsonObjectFromFile(filePath);
-            jso.put("access_token" , object.getString("access_token"));
-            jso.put("expires_in" , object.getString("expires_in"));
-            jso.put("scope" , object.getString("scope"));
-            jso.put("token_type" , object.getString("token_type"));
+            if(object.containsKey("access_token")){
+                jso.put("access_token" , object.getString("access_token"));
+            }
+
+            if(object.containsKey("expires_in")){
+                jso.put("expires_in" , object.getString("expires_in"));
+            }
+
             if(object.containsKey("refresh_token")){
                 jso.put("refresh_token" , object.getString("refresh_token"));
             }
-            String jsonToWrite = Json.encodePrettily(jso);
-            FileWriter file = new FileWriter(filePath);
 
-            for(int i = 0; i < jsonToWrite.length(); i++){
-                file.write(jsonToWrite.charAt(i));
+            if(object.containsKey("scope")){
+                jso.put("scope" , object.getString("scope"));
             }
-            file.close();
 
+            if(object.containsKey("token_type")){
+                jso.put("token_type" , object.getString("token_type"));
+            }
 
+            String jsonToWrite = Json.encodePrettily(jso);
+//            FileWriter file = new FileWriter(filePath);
+//
+//            for(int i = 0; i < jsonToWrite.length(); i++){
+//                file.write(jsonToWrite.charAt(i));
+//            }
+//            file.close();
 
-        } catch (IOException e) {
+            boolean flag = writeCredentialFile(filePath , jsonToWrite);
+            if(flag){
+                System.out.println("file Writing success full");
+            }
+            else{
+                System.err.println("File Writing failed");
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-
 
     }
 
@@ -163,6 +180,23 @@ public class AuthHelper {
 
         return credsMap;
 
+    }
+
+    public static boolean writeCredentialFile(String filePath , String dataString){
+
+        try{
+            FileWriter file = new FileWriter(filePath);
+
+            for(int i = 0; i < dataString.length(); i++){
+                file.write(dataString.charAt(i));
+            }
+            file.close();
+            return true;
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
