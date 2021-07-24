@@ -13,6 +13,8 @@ public class VideoSnippet {
     private String playlistId;
     private int position;
     private Map<String , String>resourceId;
+    private String videoOwnerChannelTitle;
+    private String videoOwnerChannelId;
 
     public VideoSnippet() {
     }
@@ -98,7 +100,40 @@ public class VideoSnippet {
         return resourceId;
     }
 
+    @Override
+    public String toString() {
+        return "VideoSnippet{" +
+                "publishedAt='" + publishedAt + '\'' +
+                ", channelId='" + channelId + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", thumbnails=" + thumbnails +
+                ", channelTitle='" + channelTitle + '\'' +
+                ", playlistId='" + playlistId + '\'' +
+                ", position=" + position +
+                ", resourceId=" + resourceId +
+                ", videoOwnerChannelTitle='" + videoOwnerChannelTitle + '\'' +
+                ", videoOwnerChannelId='" + videoOwnerChannelId + '\'' +
+                '}';
+    }
+
     public void setResourceId(Map<String, String> resourceId) {
         this.resourceId = resourceId;
+    }
+
+    public String getVideoOwnerChannelTitle() {
+        return videoOwnerChannelTitle;
+    }
+
+    public void setVideoOwnerChannelTitle(String videoOwnerChannelTitle) {
+        this.videoOwnerChannelTitle = videoOwnerChannelTitle;
+    }
+
+    public String getVideoOwnerChannelId() {
+        return videoOwnerChannelId;
+    }
+
+    public void setVideoOwnerChannelId(String videoOwnerChannelId) {
+        this.videoOwnerChannelId = videoOwnerChannelId;
     }
 }

@@ -2,20 +2,20 @@ package com.tdh.videotest.youtubeDataModel;
 
 import java.util.Map;
 
-public class VideoItems {
+public class VideoItem {
 
     private String kind;
-    private String eTag;
+    private String etag;
     private String id;
     private VideoSnippet snippet;
     private Map<String , String> contentDetails;
 
-    public VideoItems() {
+    public VideoItem() {
     }
 
-    public VideoItems(String kind, String eTag, String id, VideoSnippet snippet, Map<String, String> contentDetails) {
+    public VideoItem(String kind, String eTag, String id, VideoSnippet snippet, Map<String, String> contentDetails) {
         this.kind = kind;
-        this.eTag = eTag;
+        this.etag = eTag;
         this.id = id;
         this.snippet = snippet;
         this.contentDetails = contentDetails;
@@ -29,12 +29,23 @@ public class VideoItems {
         this.kind = kind;
     }
 
-    public String geteTag() {
-        return eTag;
+    public String getEtag() {
+        return etag;
     }
 
-    public void seteTag(String eTag) {
-        this.eTag = eTag;
+    public void setEtag(String eTag) {
+        this.etag = eTag;
+    }
+
+    @Override
+    public String toString() {
+        return "VideoItem{" +
+                "kind='" + kind + '\'' +
+                ", etag='" + etag + '\'' +
+                ", id='" + id + '\'' +
+                ", snippet=" + snippet +
+                ", contentDetails=" + contentDetails +
+                '}';
     }
 
     public String getId() {

@@ -1,7 +1,8 @@
 package com.tdh.videotest.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tdh.videotest.apiAuth.AuthHelper;
+import com.tdh.videotest.util.Util;
+import com.tdh.videotest.youtubeDataModel.VideoItem;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -17,11 +18,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.security.auth.login.CredentialException;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,11 +86,11 @@ public class RestApiController {
     }
 
     @GetMapping("/refresh")
-    private void getNewAccessToken() {
-
+    private String getNewAccessToken() {
+        System.out.println("invoked getNewAccessToken");
         String responseString="";
         String newParameters = "grant_type=refresh_token&";
-        newParameters += "refresh_token="+"1//0g_DHzaL_6VB-CgYIARAAGBASNwF-L9IrDjMxCr-b9AwHA8Ini4jfevU0RMDwDuO3MkQ7pjJBYBJjHiPtKJEbdTvEbqmGLANVnTQ"+"&";
+        newParameters += "refresh_token="+"1//0gWdr0tuXdTM6CgYIARAAGBASNwF-L9Ir40NO5JNdc3W1Apm9_jR4mi5wWobFVEvP27sVomkTW_Wk00DtusUawYr7b67IH2NVNvo"+"&";
         newParameters += "client_id=154618135621-f1iuf522m78khr2r8q63nce69jrv6dk4.apps.googleusercontent.com&";
         newParameters += "client_secret=tzE7ldNiSlKSgXLX6kIZwV38";
 
@@ -101,7 +102,7 @@ public class RestApiController {
             URL url = new URL( request );
             HttpURLConnection conn= (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);
-            conn.setInstanceFollowRedirects(false);
+//            conn.setInstanceFollowRedirects(false);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.setRequestProperty("charset", "utf-8");
@@ -111,8 +112,11 @@ public class RestApiController {
             wr.write( postData );
 
             InputStream is = null;
+            boolean success = true;
             if (conn.getResponseCode() != 200) {
                 is = conn.getErrorStream();
+                success = false;
+                System.out.println("got error while getting new access token");
             } else {
                 is = conn.getInputStream();
             }
@@ -124,16 +128,38 @@ public class RestApiController {
                 sb.append(line);
             }
             responseString = sb.toString();
-            AuthHelper.updateFile(responseString , CREDENTIAL_FILE);
-            map = AuthHelper.updateAccessCredentialsMap(responseString);
+            System.out.println(responseString);
+            if (success){
+                JsonObject accessObj = new JsonObject(responseString);
+                String token = accessObj.getString("access_token");
+                AuthHelper.updateCredsFileFromJson(accessObj);
+                return token;
+            }
+//            map = AuthHelper.updateAccessCredentialsMap(responseString);
 
         }catch(Exception e){
             e.printStackTrace();
         }
+        return null;
     }
 
     @GetMapping("/getData")
-    public Map<String , String> getYoutubeApiData(String accessToken) throws IOException {
+    public List<VideoItem> getYoutubeApiData(){
+        List<VideoItem>list = null;
+        try {
+            String access_token = Util.getYouTubeAccessToken();
+            list = getYoutubeApiData(access_token);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for (VideoItem item: list){
+            System.out.println("item: " + list);
+            System.out.println("\n");
+        }
+        return list;
+    }
+
+    public List<VideoItem> getYoutubeApiData(String accessToken) throws IOException {
        int retryMax = 5;
        int retryCount = 0;
         String uploads="";
@@ -144,11 +170,8 @@ public class RestApiController {
                 if (response.equalsIgnoreCase(UNAUTHORIZED_STRING)) {
                     while (retryCount++ < retryMax){
 
-                        getNewAccessToken();
-//                newAccessToken = AuthHelper.getDataFromFile(CREDENTIAL_FILE);
-                        JsonObject jso = AuthHelper.getJsonObjectFromFile(CREDENTIAL_FILE);
-                        String newAccessToken = jso.getString("access_token");
-                        response = fireYoutubeDataApi(newAccessToken);
+                        accessToken = getNewAccessToken();
+                        response = fireYoutubeDataApi(accessToken);
                         if (!response.equals(UNAUTHORIZED_STRING)) {
                             break;
                         }
@@ -162,11 +185,11 @@ public class RestApiController {
                 for (int i = 0; i < nodeArr.size(); i++){
                     item = nodeArr.getJsonObject(i);
                 }
-                System.out.println("items = " + item);
+//                System.out.println("items = " + item);
                 uploads = item.getJsonObject("contentDetails").getJsonObject("relatedPlaylists").getString("uploads");
-                System.out.println("uploads = " + uploads);
-
-                System.out.println("videoCount = " + videoCount);
+//                System.out.println("uploads = " + uploads);
+//
+//                System.out.println("videoCount = " + videoCount);
             }
             return getYoutubePlaylistData(accessToken , API_KEY , uploads);
 
@@ -222,8 +245,9 @@ public class RestApiController {
         return null;
     }
 
-    private Map<String, String> getYoutubePlaylistData(String accessToken, String apiKey, String uploads) {
+    private List<VideoItem> getYoutubePlaylistData(String accessToken, String apiKey, String uploads) {
 
+        List<VideoItem>list = null;
         String hostUrl = "https://www.googleapis.com/youtube/v3/playlistItems";
         String parts = "snippet,contentDetails";
 
@@ -236,10 +260,21 @@ public class RestApiController {
         RestTemplate template = new RestTemplate();
         HttpEntity<String> httpEntity = new HttpEntity<>(headers);
         ResponseEntity<String> response = template.exchange(getUrl , HttpMethod.GET , httpEntity , String.class);
-        System.out.println("Youtube data response = " + response);
+//        System.out.println("Youtube data response = " + response);
 
-
-        return null;
+        if (response.getStatusCodeValue() == 200) {
+            list = new ArrayList<>();
+            JsonObject responseObj = new JsonObject(response.getBody());
+            JsonArray arr = responseObj.getJsonArray("items");
+            for (int i=0; i < arr.size(); i++){
+                JsonObject item = arr.getJsonObject(i);
+                VideoItem videoItem = Json.decodeValue(Json.encode(item), VideoItem.class);
+                if (videoItem!=null){
+                    list.add(videoItem);
+                }
+            }
+        }
+        return list;
     }
 
     @GetMapping("/getAccessToken")
@@ -259,13 +294,10 @@ public class RestApiController {
 //            ObjectMapper mapper = new ObjectMapper();
             try {
 //                String credString = mapper.readValue(new File(CREDENTIAL_FILE), String.class);
-                String credString = AuthHelper.getDataFromFile(CREDENTIAL_FILE);
-                if(credString!= null && !credString.equalsIgnoreCase("")) {
-
-                    JsonObject credObject = new JsonObject(credString);
-                    String authToken = credObject.getString("access_token");
-                    System.out.println("auth = " + authToken);
-                    Map<String, String> youtubeApiData = getYoutubeApiData(authToken);
+                String token = Util.getYouTubeAccessToken();
+                if (token !=null && !token.isBlank()){
+                    System.out.println("auth = " + token);
+                    List<VideoItem> list = getYoutubeApiData(token);
                 }
                 else{
                     getAuthToken();
@@ -281,10 +313,16 @@ public class RestApiController {
 
     }
 
-    private String getAuthToken(){
+    @GetMapping("/testRead")
+    public void getAuthToken(){
+        JsonObject authObj = Util.getYouTubeTokenJson();
+        System.out.println("authObj: " + authObj);
+    }
 
-
-        return null;
+    @GetMapping("/testWrite")
+    public void testWriteToResourceFile(){
+        String dummy = "dummyData";
+        Util.writeStringToResourceFile(dummy, "./src/main/resources/credentials.json");
 
     }
 

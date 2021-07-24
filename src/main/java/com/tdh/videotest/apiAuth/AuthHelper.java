@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.tdh.videotest.util.Util;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.codec.binary.Base64;
@@ -31,7 +32,6 @@ public class AuthHelper {
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         headers.add("Authorization" , "Basic "+encodedCredentials);
 
-
         HttpEntity<String> request = new  HttpEntity<String>(headers);
 
         String accessTokenUrl = "https://accounts.google.com/o/oauth2/auth?";
@@ -46,7 +46,7 @@ public class AuthHelper {
 
         responseEntity = template.exchange(accessTokenUrl , HttpMethod.POST , request , String.class);
 
-        System.out.println("AAccess token =: " + responseEntity);
+        System.out.println("Access token =: " + responseEntity);
     }
 
     public static Map<String , String> updateAccessCredentialsMap(String authCode){
@@ -81,9 +81,7 @@ public class AuthHelper {
     }
 
     public static  String getNewAccessToken(){
-
     return  null;
-
     }
 
     public static void updateFile(String data , String filePath){
@@ -91,34 +89,9 @@ public class AuthHelper {
         try {
             JsonObject object = new JsonObject(data);
             System.out.println("data = "+object);
-            JsonObject jso = getJsonObjectFromFile(filePath);
-            if(object.containsKey("access_token")){
-                jso.put("access_token" , object.getString("access_token"));
-            }
+            JsonObject updatedJson = updateAuthJson(object);
 
-            if(object.containsKey("expires_in")){
-                jso.put("expires_in" , object.getString("expires_in"));
-            }
-
-            if(object.containsKey("refresh_token")){
-                jso.put("refresh_token" , object.getString("refresh_token"));
-            }
-
-            if(object.containsKey("scope")){
-                jso.put("scope" , object.getString("scope"));
-            }
-
-            if(object.containsKey("token_type")){
-                jso.put("token_type" , object.getString("token_type"));
-            }
-
-            String jsonToWrite = Json.encodePrettily(jso);
-//            FileWriter file = new FileWriter(filePath);
-//
-//            for(int i = 0; i < jsonToWrite.length(); i++){
-//                file.write(jsonToWrite.charAt(i));
-//            }
-//            file.close();
+            String jsonToWrite = Json.encodePrettily(updatedJson);
 
             boolean flag = writeCredentialFile(filePath , jsonToWrite);
             if(flag){
@@ -132,6 +105,35 @@ public class AuthHelper {
             e.printStackTrace();
         }
 
+    }
+
+    private static JsonObject updateAuthJson(JsonObject object){
+        JsonObject jso = Util.getYouTubeTokenJson();
+        if(object.containsKey("access_token")){
+            jso.put("access_token" , object.getString("access_token"));
+        }
+
+        if(object.containsKey("expires_in")){
+            jso.put("expires_in" , object.getString("expires_in"));
+        }
+
+        if(object.containsKey("refresh_token")){
+            jso.put("refresh_token" , object.getString("refresh_token"));
+        }
+
+        if(object.containsKey("scope")){
+            jso.put("scope" , object.getString("scope"));
+        }
+
+        if(object.containsKey("token_type")){
+            jso.put("token_type" , object.getString("token_type"));
+        }
+        return jso;
+    }
+
+    public static void updateCredsFileFromJson(JsonObject newObj){
+        JsonObject updatedJson = updateAuthJson(newObj);
+        Util.writeJsonToCredsFile(updatedJson);
     }
 
     public static String getDataFromFile(String fileName){
@@ -198,7 +200,5 @@ public class AuthHelper {
             return false;
         }
     }
-
-
 
 }
