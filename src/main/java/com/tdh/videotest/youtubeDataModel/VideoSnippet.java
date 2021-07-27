@@ -15,6 +15,7 @@ public class VideoSnippet {
     private Map<String , String>resourceId;
     private String videoOwnerChannelTitle;
     private String videoOwnerChannelId;
+    private String standardThumbnailUrl;
 
     public VideoSnippet() {
     }
@@ -100,6 +101,14 @@ public class VideoSnippet {
         return resourceId;
     }
 
+    public String getStandardThumbnailUrl() {
+        return standardThumbnailUrl;
+    }
+
+    public void setStandardThumbnailUrl(String standardThumbnailUrl) {
+        this.standardThumbnailUrl = standardThumbnailUrl;
+    }
+
     @Override
     public String toString() {
         return "VideoSnippet{" +
@@ -114,6 +123,7 @@ public class VideoSnippet {
                 ", resourceId=" + resourceId +
                 ", videoOwnerChannelTitle='" + videoOwnerChannelTitle + '\'' +
                 ", videoOwnerChannelId='" + videoOwnerChannelId + '\'' +
+                ", standardThumbnailUrl='" + standardThumbnailUrl + '\'' +
                 '}';
     }
 

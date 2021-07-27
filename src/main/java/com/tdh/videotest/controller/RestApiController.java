@@ -3,9 +3,11 @@ package com.tdh.videotest.controller;
 import com.tdh.videotest.apiAuth.AuthHelper;
 import com.tdh.videotest.util.Util;
 import com.tdh.videotest.youtubeDataModel.VideoItem;
+import com.tdh.videotest.youtubeDataModel.VideoSnippet;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import jdk.jshell.Snippet;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -269,6 +271,15 @@ public class RestApiController {
             for (int i=0; i < arr.size(); i++){
                 JsonObject item = arr.getJsonObject(i);
                 VideoItem videoItem = Json.decodeValue(Json.encode(item), VideoItem.class);
+                System.out.println("Standard Url = " + videoItem.getSnippet().getThumbnails().get("standard"));
+
+                if(videoItem.getSnippet().getThumbnails().get("Standard") != null){
+                    videoItem.getSnippet().setStandardThumbnailUrl(videoItem.getSnippet().getThumbnails().get("standard").getUrl());
+                }else{
+                    videoItem.getSnippet().setStandardThumbnailUrl(videoItem.getSnippet().getThumbnails().get("high").getUrl());
+
+                }
+
                 if (videoItem!=null){
                     list.add(videoItem);
                 }

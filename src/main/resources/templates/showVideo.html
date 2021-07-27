@@ -11,42 +11,19 @@
 <body>
 
 <div class="row row-cols-1 row-cols-md-3 g-4">
-    <div class="col">
+    <div class="col" th:each="var :*{youtubeApiData}">
         <div class="card">
-            <a th:href="@{/test/playVideo}"><img src="/images1/mq1.jpg" class="card-img-top" alt="image"></a>
+            <a th:href="@{/playVideo/{videoId} (videoId=${var.contentDetails.get('videoId')})}">
+                <img th:src="@{${var.snippet.standardThumbnailUrl}}" class="card-img-top" alt="image">
+            </a>
+
             <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                <h5 class="card-title"th:text="${var.snippet.title}"></h5>
+                <p class="card-text" th:text="${var.snippet.description}"></p>
             </div>
         </div>
     </div>
-    <div class="col">
-        <div class="card">
-            <a th:href="@{/test/videoJsTest}"><img src="https://image.mux.com/TAzZATvoPJnnAmncJ9bLcyFzDRaylJ8VVFvtZqIUnRA/thumbnail.png?width=214&height=121&fit_mode=pad" class="card-img-top" alt="Aadiyogi Isha Foundation"></a>
-            <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card">
-            <img src="..." class="card-img-top" alt="...">
-            <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card">
-            <img src="..." class="card-img-top" alt="...">
-            <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 <!-- JavaScript Bundle with Popper -->
